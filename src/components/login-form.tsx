@@ -2,7 +2,7 @@
 import { showSuccess, showError } from "@/lib/toast"
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/providers/context/AuthContext";
 import { validateAuth } from "@/lib/validators/auth";
 
 import { cn } from "@/lib/utils";
