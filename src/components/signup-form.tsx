@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { showSuccess, showError } from "@/lib/toast"
+import { showSuccess, showError } from "@/components/toast"
 import { useAuth } from "@/providers/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { validateAuth } from "@/lib/validators/auth";
