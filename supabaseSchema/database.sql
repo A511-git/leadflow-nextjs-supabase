@@ -23,7 +23,7 @@ A single .sql file that we should be able to run in Supabase
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-REATE
+CREATE
 TABLE IF NOT EXISTS leads (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     tenant_id UUID NOT NULL,

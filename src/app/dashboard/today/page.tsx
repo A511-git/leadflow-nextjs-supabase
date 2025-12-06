@@ -10,26 +10,22 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Spinner } from "@/components/spinner";
 
-
-
 export default function TodayPage() {
     const { user, loading } = useAuth();
     const router = useRouter();
     const queryClient = useQueryClient();
-
+    
     useEffect(() => {
         if (!user && !loading) router.push("/login");
     }, [loading, user, router]);
 
     if (loading || !user) return <Spinner />
 
-    // Fetch tasks due today
     const { data, isLoading, isError } = useQuery({
         queryKey: ["tasks-today"],
         queryFn: getTasksDueToday,
     });
-
-    // Mutation: mark task complete
+    
     const mutation = useMutation({
         mutationFn: (id: string) => markTaskComplete(id),
         onSuccess: () => {
@@ -40,11 +36,11 @@ export default function TodayPage() {
             showError("Failed to update task");
         },
     });
-
+    
     const handleComplete = (id: string) => {
         mutation.mutate(id);
     };
-
+    
     return (
         <div className="w-full flex justify-center">
             <div className="w-full max-w-5xl px-4 py-8">
