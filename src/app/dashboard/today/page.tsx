@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getTasksDueToday } from "@/lib/queries/tasks";
-import { markTaskComplete } from "@/lib/mutation/tasks";
+import { markTaskComplete } from "@/lib/mutations/tasks";
 import { TasksTable } from "@/components/tasksTable";
 import { showError, showSuccess } from "@/components/toast";
 import { useAuth } from "@/providers/context/AuthContext";

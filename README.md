@@ -1,36 +1,142 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LEADFLOW – Next.js + Supabase (Technical Test Submission)
 
-## Getting Started
+This repository contains my complete submission for the **LEARNLYNK Technical Assessment**, covering all 5 sections:
 
-First, run the development server:
+- Supabase schema design  
+- RLS policies  
+- Edge Function implementation  
+- Frontend task dashboard  
+- Stripe integration explanation (quoted verbatim)
 
-```bash
+The project is built with **Next.js 14 (App Router)**, **Supabase**, **React Query**, and **TypeScript**.
+
+---
+
+## 🗂 Repository Structure Overview
+
+LEADFLOW-NEXTJS-SUPABASE
+├── src/
+│   ├── app/                 
+│   ├── components/          
+│   ├── lib/                 
+│   └── providers/           
+├── supabase/
+│   └── functions/           
+├── supabaseSchema/          
+└── README.md
+
+This layout follows modern Next.js conventions and provides clear separation between UI, logic, and backend functions.
+
+---
+
+# SECTION 1 — Supabase Schema  
+📄 **Location:** `supabaseSchema/database.sql`
+
+This file contains:
+
+- **Tables:** `leads`, `applications`, `tasks`  
+- Required fields: `id`, `tenant_id`, `created_at`, `updated_at`  
+- Relationships:  
+  - `applications.lead_id → leads.id`  
+  - `tasks.related_id → applications.id`  
+- Constraints:  
+  - CHECK (`task.type` is one of `'call' | 'email' | 'review'`)  
+  - CHECK (`tasks.due_at >= created_at`)  
+- Indexes for: owner, stage, created_at, fetch by lead, fetch tasks due today
+
+The schema runs directly inside Supabase SQL Editor.
+
+---
+
+# SECTION 2 — RLS & Policies  
+📄 **Location:** Inside `database.sql` below schema definition
+
+RLS is enabled on all tables.
+
+### Leads Policy Rules  
+- **Admins:** full access  
+- **Counselors:** may read  
+  - leads assigned to them, or  
+  - leads assigned to their team  
+- **Counselors Insert:**  
+  - `owner_id = auth.uid()`  
+  - `team_id` must be one of the counselor’s teams  
+
+JWT role is read via `auth.jwt()->>'role'`.
+
+---
+
+# SECTION 3 — Edge Function (create-task)  
+📄 **Location:** `supabase/functions/createTask/index.ts`
+
+This Edge Function:
+
+1. Accepts POST body with:  
+   - `application_id`, `task_type`, `due_at`, `title`, `tenant_id`  
+2. Validates:  
+   - required fields  
+   - allowed task types: `call`, `email`, `review`  
+   - future `due_at`  
+3. Inserts using **Service Role client**  
+4. Emits a Realtime broadcast event (`task.created`)  
+5. Returns structured JSON with status and `task_id`
+
+---
+
+# SECTION 4 — Next.js Frontend (`/dashboard/today`)  
+📄 **Location:** `src/app/dashboard/today/page.tsx`
+
+This page demonstrates:
+
+- Protected route using global **AuthContext**  
+- Fetching today's tasks using **React Query**  
+- Display in `TasksTable`  
+- Mark-complete mutation  
+- Auto-refetch  
+- Full loading and error UI  
+
+---
+
+# SECTION 5 — Stripe Checkout Integration
+
+Frontend stores the application ID. When the user clicks Pay, the frontend sends the application ID to the backend. The backend verifies the authenticated user and confirms the application belongs to them. The backend then creates a Stripe Checkout Session and stores a pending payment record in the database with Stripe metadata. The backend redirects the frontend to Stripe redirection URL. After the user completes payment, Stripe returns the result to the backend by connected webhook. The backend verifies the webhook signature, updates the payment status. Frontend fetches the updated payment status from the database.
+
+---
+
+# 🚀 Running the Project
+
+### 1. Install dependencies  
+npm install
+
+### 2. Add environment variables  
+Copy `.sample.env.local` → `.env.local`
+
+### 3. Start development server  
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 4. Supabase Resources  
+- Schema: `supabaseSchema/database.sql`  
+- Edge Function: `supabase/functions/createTask/`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 🛠️ Tech Stack
 
-## Learn More
+- Next.js 14  
+- Supabase  
+- TypeScript  
+- React Query  
+- TailwindCSS  
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 📌 Summary
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This solution demonstrates:
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Strong schema design  
+- Access control with RLS  
+- Edge Functions  
+- Frontend async workflows  
+- Stripe integration understanding  
+- Clean file structure  
